@@ -1,8 +1,9 @@
-name: disassembly_dp_vision
+name: disassembly_dp_force
 
 image_shape: [3, 240, 320]
 state_shape: [8]
-dataset_path: data/disassembly_vision.zarr
+force_shape: [7]
+dataset_path: data/disassembly_force.zarr
 
 shape_meta: &shape_meta
   obs:
@@ -15,11 +16,14 @@ shape_meta: &shape_meta
     state:
       shape: ${task.state_shape}
       type: low_dim
+    force:
+      shape: ${task.force_shape}
+      type: low_dim
   action:
     shape: [8]
 
 dataset:
-  _target_: diffusion_policy.dataset.disassembly_vision_dataset.DisassemblyVisionDataset
+  _target_: diffusion_policy.dataset.disassembly_force_dataset.DisassemblyForceDataset
   shape_meta: *shape_meta
   dataset_path: ${task.dataset_path}
   horizon: ${horizon}

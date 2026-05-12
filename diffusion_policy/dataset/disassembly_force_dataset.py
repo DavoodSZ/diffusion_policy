@@ -15,7 +15,12 @@ from diffusion_policy.dataset.base_dataset import BaseImageDataset
 from diffusion_policy.model.common.normalizer import LinearNormalizer, SingleFieldLinearNormalizer
 
 
-class DisassemblyVisionDataset(BaseImageDataset):
+class DisassemblyForceDataset(BaseImageDataset):
+    """Force + vision + proprio hybrid dataset for disassembly.
+
+    Zarr keys expected: image, wrist_image (rgb), state, force (low_dim), action.
+    """
+
     def __init__(
         self,
         shape_meta: dict,
@@ -40,8 +45,8 @@ class DisassemblyVisionDataset(BaseImageDataset):
         else:
             replay_buffer = ReplayBuffer.create_from_path(dataset_path, mode="r")
 
-        rgb_keys = list()
-        lowdim_keys = list()
+        rgb_keys = []
+        lowdim_keys = []
         obs_shape_meta = shape_meta["obs"]
         for key, attr in obs_shape_meta.items():
             obs_type = attr.get("type", "low_dim")
@@ -50,7 +55,7 @@ class DisassemblyVisionDataset(BaseImageDataset):
             elif obs_type == "low_dim":
                 lowdim_keys.append(key)
 
-        key_first_k = dict()
+        key_first_k = {}
         if n_obs_steps is not None:
             for key in rgb_keys + lowdim_keys:
                 key_first_k[key] = n_obs_steps
@@ -122,7 +127,7 @@ class DisassemblyVisionDataset(BaseImageDataset):
         data = self.sampler.sample_sequence(idx)
 
         obs_slice = slice(self.n_obs_steps)
-        obs_dict = dict()
+        obs_dict = {}
         for key in self.rgb_keys:
             obs_dict[key] = np.moveaxis(data[key][obs_slice], -1, 1).astype(np.float32) / 255.0
             del data[key]
@@ -132,7 +137,7 @@ class DisassemblyVisionDataset(BaseImageDataset):
 
         action = data["action"].astype(np.float32)
         if self.n_latency_steps > 0:
-            action = action[self.n_latency_steps :]
+            action = action[self.n_latency_steps:]
 
         return {
             "obs": dict_apply(obs_dict, torch.from_numpy),
