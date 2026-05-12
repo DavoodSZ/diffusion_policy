@@ -78,13 +78,6 @@ dataloader:
   pin_memory: True
   persistent_workers: False
 
-val_dataloader:
-  batch_size: 64
-  num_workers: 4
-  shuffle: False
-  pin_memory: True
-  persistent_workers: False
-
 optimizer:
   _target_: torch.optim.AdamW
   lr: 1.0e-4
@@ -106,15 +99,13 @@ training:
   # replace BatchNorm with GroupNorm.
   use_ema: True
   freeze_encoder: False
-  # training loop control
-  # in epochs
-  rollout_every: 50
-  checkpoint_every: 50
-  val_every: 1
-  sample_every: 5
+  # training loop control, interpreted as gradient steps.
+  checkpoint_every: 5000
   # steps per epoch
   max_train_steps: null
-  max_val_steps: null
+  # global gradient-step controls
+  max_global_steps: null
+  log_every_steps: 1
   # misc
   tqdm_interval_sec: 1.0
 

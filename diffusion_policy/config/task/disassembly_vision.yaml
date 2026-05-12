@@ -1,0 +1,29 @@
+name: disassembly_dp_vision
+
+image_shape: [3, 240, 320]
+dataset_path: data/disassembly_vision.zarr
+
+shape_meta: &shape_meta
+  obs:
+    image:
+      shape: ${task.image_shape}
+      type: rgb
+    wrist_image:
+      shape: ${task.image_shape}
+      type: rgb
+  action:
+    shape: [8]
+
+dataset:
+  _target_: diffusion_policy.dataset.disassembly_vision_dataset.DisassemblyVisionDataset
+  shape_meta: *shape_meta
+  dataset_path: ${task.dataset_path}
+  horizon: ${horizon}
+  pad_before: ${eval:'${n_obs_steps}-1+${n_latency_steps}'}
+  pad_after: ${eval:'${n_action_steps}-1'}
+  n_obs_steps: ${dataset_obs_steps}
+  n_latency_steps: ${n_latency_steps}
+  load_to_memory: True
+  seed: 42
+  val_ratio: 0.0
+  max_train_episodes: null
